@@ -1,0 +1,199 @@
+1、数据库系统
+    数据库系统包含以下三个部分：
+        数据库：用于存储数据的地方
+        数据库管理系统：用于管理数据库的软件
+        数据库应用程序：为提高数据库系统的处理能力所适应的管理数据库的软件补充
+
+2、SQL语言
+    SQL语言包括以下四个部分
+    （1）数据定义语言（DDL）：DROP、CEEATE、ALTER等语句
+    （2）数据操作语言（DML）：INSERT（插入）、UPDATE（修改）、DELETE（删除）语句
+    （3）数据查询语言（DQL）：SELECT语句
+    （4）数据控制语言（DCL）：GRANT、REVOKE、COMMIT、ROLLBACK等语句
+    
+3、数据库基本操作
+    创建数据库：CREATE DATABASE 数据库名;
+        Eg：
+            CREATE DATABASE test_db;
+    查看创建的数据库：SHOW CREATE DATABASE 数据库名;
+        Eg：
+            SHOW CREATE DATABASE test_db;
+    查看所有的数据库：SHOU DATABASES
+    删除数据库：DROP DATABASE 数据库名;
+        Eg：
+            DROP DATABASE test_db;
+
+4、数据表的基本操作
+    1.创建数据表
+        在创建数据表之前，需使用“USE 数据库名”指定操作的是哪个数据库，否则会报错
+        创建表：CREATE TABLE 表名;
+        创建表时必须指明：
+            （1）创建的表的名称，不能使用SQL语言中的关键字；
+            （2）数据表中每一个列（字段）的名称和数据类型，若创建多列，要用逗号隔开
+                Eg：
+                    CREATE TABLE tb_emp1
+                    (
+                    id INT(11),
+                    name VARCHAR(25),
+                    deptId INT(11),
+                    salary FLOAT
+                    );
+                    
+        查看所有数据表：SHOW TABLES;
+        
+        使用主键约束：
+            主键要求主键列的数据唯一，且不能为空。主键能够唯一地标识表中的一条数据，可以结合
+            外键来定义不同数据表之间的关系，并且可加快数据库查询的速度。
+            1、单字段主键
+                语法格式1：
+                    字段名 数据类型 PRIMARY KEY
+                    eg：
+                        CREATE TABLE tb_emp2
+                        (
+                        id INT(11) PRIMARY KEY, #在定义列的同时指定主键
+                        name VARCHAR(25),
+                        deptId INT(11),
+                        salary FLOAT
+                        );
+                语法格式2：
+                    eg：
+                        CREATE TABLE tb_emp3
+                        (
+                        id INT(11) PRIMARY KEY, 
+                        name VARCHAR(25),
+                        deptId INT(11),
+                        salary FLOAT
+                        PRIMARY KEY(id)         #在定义完所有列之后指定主键
+                        );
+            2、多字段联合主键
+                语法：PRIMARY KEY [字段1、字段2...]
+                eg:
+                    CREATE TABLE tb_emp4
+                    (
+                    id INT(11) PRIMARY KEY, 
+                    name VARCHAR(25),
+                    deptId INT(11),
+                    salary FLOAT
+                    PRIMARY KEY(name,deptId)
+                    );
+                    
+        使用外键约束
+            外键用于在两个表的数据之间建立链接，可为一列或多列。一个表可有一个或多个外键。外键对应的是参照完整性，
+        一个表的外键可以是空值，若不为空值，则每一个外键值必须等于另一个表中主键的某个值。
+            定义外键后，不允许删除在另一个表中具有关联关系的行。其作用是保持数据的一致性、完整性。
+            主表（父表）：对于两个具有关联关系的表而言，相关联字段中主键所在的那个表即为主表。
+            从表（子表）：对于两个具有关联关系的表而言，相关联字段中外键所在的那个表即为子表。
+            语法：
+                [CONSTRAINT <外键名>] FOREIGN KEY 字段1[,字段2...]
+                REFERENCES <主表名>主键列1[,主键列2,...]
+                eg:
+                    主表：
+                        CREATE TABLE tb_dept1
+                        (
+                        id INT(11) PRIMARY KEY,
+                        name VARCHAR(22) NOT NULL,
+                        location VARCHAR(50)
+                        );
+                    从表：
+                        CREATE TABLE tb_emp5
+                        (
+                        id INT(11) PRIMARY KEY,
+                        name VARCHAR(25),
+                        deptId INT(11),
+                        salary FLOAT,
+                        CONSTRAINT fk_emp_dept1 FOREIGN KEY(deptId) REFERENCES tb_dept1(id)
+                        );
+                知识点：关联指的是在关系型数据库中，相关表之间的联系。它通过相容或相同的属性或属性组来表示。子表的外键必须
+                        关联父表的主键，且关联字段的数据类型必须匹配，若类型不同，则创建子表时会报错。
+                        
+        使用非空约束
+            非空约束：字段的值不能为空。
+            语法：
+                字段名 数据类型 not null
+                
+        使用唯一性约束
+            唯一性约束要求该列唯一，允许为空，但只能出现一个空值。唯一约束可确保一列或多列不出现重复值
+            语法：
+                字段名 数据类型 UNIQUE
+                eg：
+                    CREATE TABLE tb_dept2
+                    (
+                    id INT(11) PRIMARY KEY,
+                    name VARCHAR(22) UNIQUE,
+                    location VARCHAR(50)
+                    );
+            知识点：UNIQUE 和 PRIMARY KEY的区别在于，一个表中可以有多个字段申明为UNIQUE,但只能有一个PRIMARY KEY；此外，申明为
+                    PRIMARY KEY的列不允许有空值，但申明为UNIQUE的字段允许空值（NULL）的存在。
+                    
+        使用默认约束
+            默认约束可指定某列的默认值。
+            语法：
+                字段名 数据类型 DEFAULT 默认值
+            作用：当插入数据中若没有给该字段赋值，则系统会自动为该字段赋予默认值
+            
+        设置表的属性值自动增加
+            在Mysql中AUTO_INCREMENT的初始值为1，每新增一条记录，字段值自动加1。一个表中只能有一个字段使用AUTO_INCREMENT约束，
+            且该字段必须是主键的一部分。
+            格式：
+                字段名 数据类型 AUTO_INCREMENT
+            
+    2.查看数据表
+        查看表基本结构
+            DESCRIBE 表名;
+            或
+            DESC 表名;
+            
+        查看表详情结构：
+            SHOW CREATE TABLE 表名;
+            
+    3、修改数据表
+        修改表名
+            语法：
+                ALTER TABLE <旧表名> RENAME [TO] <新表名>;
+                eg：
+                    ALTER TABLE tao RENAME Tao;
+                    
+        
+        修改字段的数据类型
+            语法：
+                ALTER TABLE <表名> MODIFY <字段名> <数据类型>
+                eg：
+                    ALTER TABLE tao MODIFY name VARCHAR(30)
+                    
+        修改字段名
+            语法：
+                ALTER TABLE <表名> CHANGE <旧字段名> <新字段名> <新数据类型>；
+                eg：
+                    ALTER TABLE tao change name full_name varchar(30);
+                    
+        添加字段
+            语法：
+                ALTER TABLE <表名> ADD <新字段名> <数据类型> [约束条件] [FIRST | AFTER 已存在字段名]；
+                注：“FIRST | AFTER 已存在字段名”用于指定新增字段在表中的位置，若无该参数，则默认将新添加的字段
+                    设置为数据表的最后列。
+                eg:
+                    ALTER TABLE tb_dept1 ADD manage VARCHAR(22) NOT NULL;
+        删除字段
+            语法：
+                ALTER TABLE <表名> DROP <字段名>;
+                eg：
+                    ALTER TABLE tb_dept1 DROP manage;
+                
+        修改字段的排列位置
+            语法：
+                ALTER TABLE <表名> MODIFY <字段名1> <数据类型> FIRST | AFTER <字段名2>
+        
+        修改表的存储引擎
+            语法：
+                ALTER TABLE <表名> ENGINE=<更改后的存储引擎名>;
+                
+        删除表的外键约束
+            语法：
+                ALTER TABLE <表名> DROP FOREIGN KEY <外键约束名>
+                
+    4、删除数据表
+
+
+
+
+
